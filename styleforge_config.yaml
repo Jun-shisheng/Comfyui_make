@@ -1,0 +1,81 @@
+# StyleForge 模型配置 — 根据环境自动选择模型
+# environment: local (8GB) | cloud_4090 (24GB)
+
+environment: local
+
+# 图像生成模型
+image:
+  txt2img:
+    local:
+      unet: "qwen_image_fp8_e4m3fn.safetensors"
+      clip: "qwen_2.5_vl_7b_fp8_scaled.safetensors"
+      clip_type: "qwen_image"
+      vae: "qwen_image_vae.safetensors"
+      max_resolution: 512
+      steps: 12
+      cfg: 3.5
+    cloud_4090:
+      unet: "qwen_image_fp8_e4m3fn.safetensors"
+      clip: "qwen_2.5_vl_7b_fp8_scaled.safetensors"
+      clip_type: "qwen_image"
+      vae: "qwen_image_vae.safetensors"
+      max_resolution: 2048
+      steps: 20
+      cfg: 3.5
+
+  # 可选: FLUX.1-dev (需下载 flux1-dev.safetensors + clip_l.safetensors + t5xxl_fp16.safetensors)
+  flux:
+    cloud_4090:
+      unet: "flux1-dev.safetensors"
+      clip: "clip_l.safetensors"
+      t5: "t5xxl_fp16.safetensors"
+      vae: "ae.safetensors"
+      max_resolution: 2048
+
+# 视频生成模型
+video:
+  t2v:
+    local:
+      unet: "wan\\wan2.1_t2v_1.3b.safetensors"
+      clip: "wan_t5\\text_encoder\\model-00001-of-00003.safetensors"
+      clip_type: "wan"
+      vae: "wan\\Wan2.1_VAE.pth"
+      max_resolution: "480p (832x480)"
+      length: 81
+      steps: 20
+      cfg: 4.0
+    cloud_4090:
+      # Wan 2.1 T2V 14B — 需下载到 models/diffusion_models/wan/
+      unet: "wan\\wan2.1_t2v_14b_fp8.safetensors"
+      clip: "wan_t5\\text_encoder\\model-00001-of-00003.safetensors"
+      clip_type: "wan"
+      vae: "wan\\Wan2.1_VAE.pth"
+      max_resolution: "720p (1280x720)"
+      length: 81
+      steps: 20
+      cfg: 4.0
+
+  i2v:
+    local:
+      # 本地用 T2V 1.3B + start_image 模拟 I2V
+      unet: "wan\\wan2.1_t2v_1.3b.safetensors"
+      clip: "wan_t5\\text_encoder\\model-00001-of-00003.safetensors"
+      clip_type: "wan"
+      vae: "wan\\Wan2.1_VAE.pth"
+      max_resolution: "480p (832x480)"
+      length: 81
+    cloud_4090:
+      # Wan 2.1 I2V 14B — 真正的图生视频模型
+      # 需下载到 models/diffusion_models/wan/
+      unet: "wan\\wan2.1_i2v_14b_fp8.safetensors"
+      clip: "wan_t5\\text_encoder\\model-00001-of-00003.safetensors"
+      clip_type: "wan"
+      vae: "wan\\Wan2.1_VAE.pth"
+      max_resolution: "720p (1280x720)"
+      length: 81
+
+# 换脸 (本地和云端相同)
+faceswap:
+  swap_model: "inswapper_128.onnx"
+  face_detection: "retinaface_resnet50"
+  face_restore: "GFPGANv1.4.pth"

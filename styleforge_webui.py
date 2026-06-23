@@ -12,10 +12,12 @@ import urllib.parse
 import urllib.error
 import base64
 import io
+import yaml
 from pathlib import Path
 
 COMFYUI_URL = "http://127.0.0.1:8188"
 PROMPT_LIBRARY_PATH = os.path.join(os.path.dirname(__file__), "prompts", "prompt_library.json")
+CONFIG_PATH = os.path.join(os.path.dirname(__file__), "styleforge_config.yaml")
 
 # Import Gradio
 try:
@@ -25,6 +27,25 @@ except ImportError:
     import subprocess
     subprocess.check_call([sys.executable, "-m", "pip", "install", "gradio"])
     import gradio as gr
+
+
+def load_config():
+    """Load StyleForge configuration, auto-detecting environment."""
+    if not os.path.exists(CONFIG_PATH):
+        return {"environment": "local"}
+    with open(CONFIG_PATH, "r", encoding="utf-8") as f:
+        cfg = yaml.safe_load(f)
+    # Auto-detect: if VRAM >= 20GB, switch to cloud profile
+    env = cfg.get("environment", "local")
+    if env == "auto":
+        try:
+            import subprocess, re
+            out = subprocess.check_output(["nvidia-smi", "--query-gpu=memory.total", "--format=csv,noheader,nounits"], text=True)
+            vram_mb = int(re.findall(r'\d+', out)[0])
+            env = "cloud_4090" if vram_mb >= 20000 else "local"
+        except:
+            env = "local"
+    return cfg, env
 
 
 def queue_prompt(prompt_workflow):
@@ -92,16 +113,27 @@ def get_available_workflows():
     return workflows
 
 
+def _get_model(cfg, env, section, key, default=None):
+    """Resolve a model path from config for current environment."""
+    try:
+        return cfg[section][env][key]
+    except (KeyError, TypeError):
+        return default
+
+
 def build_txt2img_workflow(prompt, negative_prompt, width, height, seed):
-    """Build Qwen Image text-to-image API prompt dict."""
+    cfg, env = load_config()
+    m = cfg.get("image", {}).get("txt2img", {}).get(env, {})
+    steps = m.get("steps", 12 if env == "local" else 20)
+    cfg_val = m.get("cfg", 3.5)
     return {
-        "1": {"class_type": "UNETLoader", "inputs": {"unet_name": "qwen_image_fp8_e4m3fn.safetensors", "weight_dtype": "default"}},
-        "2": {"class_type": "CLIPLoader", "inputs": {"clip_name": "qwen_2.5_vl_7b_fp8_scaled.safetensors", "type": "qwen_image"}},
-        "3": {"class_type": "VAELoader", "inputs": {"vae_name": "qwen_image_vae.safetensors"}},
+        "1": {"class_type": "UNETLoader", "inputs": {"unet_name": m["unet"], "weight_dtype": "default"}},
+        "2": {"class_type": "CLIPLoader", "inputs": {"clip_name": m["clip"], "type": m["clip_type"]}},
+        "3": {"class_type": "VAELoader", "inputs": {"vae_name": m["vae"]}},
         "4": {"class_type": "TextEncodeQwenImageEdit", "inputs": {"clip": ["2", 0], "prompt": prompt}},
         "5": {"class_type": "TextEncodeQwenImageEdit", "inputs": {"clip": ["2", 0], "prompt": negative_prompt}},
         "6": {"class_type": "EmptyQwenImageLayeredLatentImage", "inputs": {"width": width, "height": height, "layers": 3, "batch_size": 1}},
-        "7": {"class_type": "KSampler", "inputs": {"model": ["1", 0], "positive": ["4", 0], "negative": ["5", 0], "latent_image": ["6", 0], "seed": seed, "steps": 20, "cfg": 3.5, "sampler_name": "dpmpp_2m", "scheduler": "normal", "denoise": 1.0}},
+        "7": {"class_type": "KSampler", "inputs": {"model": ["1", 0], "positive": ["4", 0], "negative": ["5", 0], "latent_image": ["6", 0], "seed": seed, "steps": steps, "cfg": cfg_val, "sampler_name": "dpmpp_2m", "scheduler": "normal", "denoise": 1.0}},
         "8": {"class_type": "VAEDecodeTiled", "inputs": {"samples": ["7", 0], "vae": ["3", 0], "tile_size": 512, "overlap": 64, "temporal_size": 64, "temporal_overlap": 8}},
         "9": {"class_type": "PreviewImage", "inputs": {"images": ["8", 0]}},
         "10": {"class_type": "SaveImage", "inputs": {"images": ["8", 0], "filename_prefix": "qwen_txt2img"}},
@@ -109,7 +141,8 @@ def build_txt2img_workflow(prompt, negative_prompt, width, height, seed):
 
 
 def build_img2img_workflow(prompt, negative_prompt, ref_image_b64, width, height, seed):
-    """Build Qwen Image image-to-image API prompt dict."""
+    cfg, env = load_config()
+    m = cfg.get("image", {}).get("txt2img", {}).get(env, {})
     input_dir = os.path.join(os.path.dirname(__file__), "input")
     os.makedirs(input_dir, exist_ok=True)
     ref_path = os.path.join(input_dir, "ref_img2img.png")
@@ -117,16 +150,15 @@ def build_img2img_workflow(prompt, negative_prompt, ref_image_b64, width, height
         raw = ref_image_b64.split(",")[-1] if "," in ref_image_b64 else ref_image_b64
         with open(ref_path, "wb") as f:
             f.write(base64.b64decode(raw))
-
     return {
-        "1": {"class_type": "UNETLoader", "inputs": {"unet_name": "qwen_image_fp8_e4m3fn.safetensors", "weight_dtype": "default"}},
-        "2": {"class_type": "CLIPLoader", "inputs": {"clip_name": "qwen_2.5_vl_7b_fp8_scaled.safetensors", "type": "qwen_image"}},
-        "3": {"class_type": "VAELoader", "inputs": {"vae_name": "qwen_image_vae.safetensors"}},
+        "1": {"class_type": "UNETLoader", "inputs": {"unet_name": m["unet"], "weight_dtype": "default"}},
+        "2": {"class_type": "CLIPLoader", "inputs": {"clip_name": m["clip"], "type": m["clip_type"]}},
+        "3": {"class_type": "VAELoader", "inputs": {"vae_name": m["vae"]}},
         "4": {"class_type": "LoadImage", "inputs": {"image": "ref_img2img.png"}},
         "5": {"class_type": "TextEncodeQwenImageEdit", "inputs": {"clip": ["2", 0], "prompt": prompt, "vae": ["3", 0], "image": ["4", 0]}},
         "6": {"class_type": "TextEncodeQwenImageEdit", "inputs": {"clip": ["2", 0], "prompt": negative_prompt}},
         "7": {"class_type": "EmptyQwenImageLayeredLatentImage", "inputs": {"width": width, "height": height, "layers": 3, "batch_size": 1}},
-        "8": {"class_type": "KSampler", "inputs": {"model": ["1", 0], "positive": ["5", 0], "negative": ["6", 0], "latent_image": ["7", 0], "seed": seed, "steps": 20, "cfg": 2.5, "sampler_name": "dpmpp_2m", "scheduler": "normal", "denoise": 1.0}},
+        "8": {"class_type": "KSampler", "inputs": {"model": ["1", 0], "positive": ["5", 0], "negative": ["6", 0], "latent_image": ["7", 0], "seed": seed, "steps": m.get("steps", 12), "cfg": 2.5, "sampler_name": "dpmpp_2m", "scheduler": "normal", "denoise": 1.0}},
         "9": {"class_type": "VAEDecodeTiled", "inputs": {"samples": ["8", 0], "vae": ["3", 0], "tile_size": 512, "overlap": 64, "temporal_size": 64, "temporal_overlap": 8}},
         "10": {"class_type": "PreviewImage", "inputs": {"images": ["9", 0]}},
         "11": {"class_type": "SaveImage", "inputs": {"images": ["9", 0], "filename_prefix": "qwen_img2img"}},
@@ -134,21 +166,25 @@ def build_img2img_workflow(prompt, negative_prompt, ref_image_b64, width, height
 
 
 def build_t2v_workflow(prompt, negative_prompt, duration, resolution, seed):
-    """Build Wan text-to-video API prompt dict."""
+    cfg, env = load_config()
+    m = cfg.get("video", {}).get("t2v", {}).get(env, {})
+    if not m:
+        return None
     if "720" in resolution:
         w, h = 1280, 720
     else:
         w, h = 832, 480
     length = ((duration * 16) // 4) * 4 + 1
-
+    steps = m.get("steps", 20)
+    cfg_val = m.get("cfg", 4.0)
     return {
-        "1": {"class_type": "UNETLoader", "inputs": {"unet_name": "wan\\wan2.1_t2v_1.3b.safetensors", "weight_dtype": "default"}},
-        "2": {"class_type": "CLIPLoader", "inputs": {"clip_name": "wan_t5\\text_encoder\\model-00001-of-00003.safetensors", "type": "wan"}},
-        "3": {"class_type": "VAELoader", "inputs": {"vae_name": "wan\\Wan2.1_VAE.pth"}},
+        "1": {"class_type": "UNETLoader", "inputs": {"unet_name": m["unet"], "weight_dtype": "default"}},
+        "2": {"class_type": "CLIPLoader", "inputs": {"clip_name": m["clip"], "type": m["clip_type"]}},
+        "3": {"class_type": "VAELoader", "inputs": {"vae_name": m["vae"]}},
         "4": {"class_type": "CLIPTextEncode", "inputs": {"text": prompt, "clip": ["2", 0]}},
         "5": {"class_type": "CLIPTextEncode", "inputs": {"text": negative_prompt, "clip": ["2", 0]}},
         "6": {"class_type": "WanImageToVideo", "inputs": {"positive": ["4", 0], "negative": ["5", 0], "vae": ["3", 0], "width": w, "height": h, "length": length, "batch_size": 1}},
-        "7": {"class_type": "KSampler", "inputs": {"model": ["1", 0], "positive": ["6", 0], "negative": ["6", 1], "latent_image": ["6", 2], "seed": seed, "steps": 20, "cfg": 4.0, "sampler_name": "euler", "scheduler": "simple", "denoise": 1.0}},
+        "7": {"class_type": "KSampler", "inputs": {"model": ["1", 0], "positive": ["6", 0], "negative": ["6", 1], "latent_image": ["6", 2], "seed": seed, "steps": steps, "cfg": cfg_val, "sampler_name": "euler", "scheduler": "simple", "denoise": 1.0}},
         "8": {"class_type": "VAEDecode", "inputs": {"samples": ["7", 0], "vae": ["3", 0]}},
         "9": {"class_type": "PreviewImage", "inputs": {"images": ["8", 0]}},
         "10": {"class_type": "SaveImage", "inputs": {"images": ["8", 0], "filename_prefix": "wan_t2v"}},
@@ -156,7 +192,10 @@ def build_t2v_workflow(prompt, negative_prompt, duration, resolution, seed):
 
 
 def build_i2v_workflow(prompt, negative_prompt, start_image_b64, duration, seed):
-    """Build Wan image-to-video API prompt dict with start_image."""
+    cfg, env = load_config()
+    m = cfg.get("video", {}).get("i2v", {}).get(env, {})
+    if not m:
+        return None
     input_dir = os.path.join(os.path.dirname(__file__), "input")
     os.makedirs(input_dir, exist_ok=True)
     ref_path = os.path.join(input_dir, "start_frame_i2v.png")
@@ -164,18 +203,16 @@ def build_i2v_workflow(prompt, negative_prompt, start_image_b64, duration, seed)
         raw = start_image_b64.split(",")[-1] if "," in start_image_b64 else start_image_b64
         with open(ref_path, "wb") as f:
             f.write(base64.b64decode(raw))
-
     length = ((duration * 16) // 4) * 4 + 1
-
     return {
-        "1": {"class_type": "UNETLoader", "inputs": {"unet_name": "wan\\wan2.1_t2v_1.3b.safetensors", "weight_dtype": "default"}},
-        "2": {"class_type": "CLIPLoader", "inputs": {"clip_name": "wan_t5\\text_encoder\\model-00001-of-00003.safetensors", "type": "wan"}},
-        "3": {"class_type": "VAELoader", "inputs": {"vae_name": "wan\\Wan2.1_VAE.pth"}},
+        "1": {"class_type": "UNETLoader", "inputs": {"unet_name": m["unet"], "weight_dtype": "default"}},
+        "2": {"class_type": "CLIPLoader", "inputs": {"clip_name": m["clip"], "type": m["clip_type"]}},
+        "3": {"class_type": "VAELoader", "inputs": {"vae_name": m["vae"]}},
         "4": {"class_type": "LoadImage", "inputs": {"image": "start_frame_i2v.png"}},
         "5": {"class_type": "CLIPTextEncode", "inputs": {"text": prompt, "clip": ["2", 0]}},
         "6": {"class_type": "CLIPTextEncode", "inputs": {"text": negative_prompt, "clip": ["2", 0]}},
         "7": {"class_type": "WanImageToVideo", "inputs": {"positive": ["5", 0], "negative": ["6", 0], "vae": ["3", 0], "start_image": ["4", 0], "width": 832, "height": 480, "length": length, "batch_size": 1}},
-        "8": {"class_type": "KSampler", "inputs": {"model": ["1", 0], "positive": ["7", 0], "negative": ["7", 1], "latent_image": ["7", 2], "seed": seed, "steps": 20, "cfg": 4.0, "sampler_name": "euler", "scheduler": "simple", "denoise": 1.0}},
+        "8": {"class_type": "KSampler", "inputs": {"model": ["1", 0], "positive": ["7", 0], "negative": ["7", 1], "latent_image": ["7", 2], "seed": seed, "steps": m.get("steps", 20), "cfg": m.get("cfg", 4.0), "sampler_name": "euler", "scheduler": "simple", "denoise": 1.0}},
         "9": {"class_type": "VAEDecode", "inputs": {"samples": ["8", 0], "vae": ["3", 0]}},
         "10": {"class_type": "PreviewImage", "inputs": {"images": ["9", 0]}},
         "11": {"class_type": "SaveImage", "inputs": {"images": ["9", 0], "filename_prefix": "wan_i2v"}},
@@ -183,25 +220,29 @@ def build_i2v_workflow(prompt, negative_prompt, start_image_b64, duration, seed)
 
 
 def build_char_to_video_workflow(char_prompt, char_neg, motion_prompt, motion_neg, width, height, seed):
-    """Build full pipeline API prompt dict: Qwen Image → Wan I2V."""
+    cfg, env = load_config()
+    img_m = cfg.get("image", {}).get("txt2img", {}).get(env, {})
+    vid_m = cfg.get("video", {}).get("i2v", {}).get(env, {})
+    if not vid_m:
+        return None
     return {
-        # === Stage 1: Qwen Image character generation ===
-        "1": {"class_type": "UNETLoader", "inputs": {"unet_name": "qwen_image_fp8_e4m3fn.safetensors", "weight_dtype": "default"}},
-        "2": {"class_type": "CLIPLoader", "inputs": {"clip_name": "qwen_2.5_vl_7b_fp8_scaled.safetensors", "type": "qwen_image"}},
-        "3": {"class_type": "VAELoader", "inputs": {"vae_name": "qwen_image_vae.safetensors"}},
+        # === Stage 1: Qwen Image ===
+        "1": {"class_type": "UNETLoader", "inputs": {"unet_name": img_m["unet"], "weight_dtype": "default"}},
+        "2": {"class_type": "CLIPLoader", "inputs": {"clip_name": img_m["clip"], "type": img_m["clip_type"]}},
+        "3": {"class_type": "VAELoader", "inputs": {"vae_name": img_m["vae"]}},
         "4": {"class_type": "TextEncodeQwenImageEdit", "inputs": {"clip": ["2", 0], "prompt": char_prompt}},
         "5": {"class_type": "TextEncodeQwenImageEdit", "inputs": {"clip": ["2", 0], "prompt": char_neg}},
         "6": {"class_type": "EmptyQwenImageLayeredLatentImage", "inputs": {"width": width, "height": height, "layers": 3, "batch_size": 1}},
-        "7": {"class_type": "KSampler", "inputs": {"model": ["1", 0], "positive": ["4", 0], "negative": ["5", 0], "latent_image": ["6", 0], "seed": seed, "steps": 20, "cfg": 3.5, "sampler_name": "dpmpp_2m", "scheduler": "normal", "denoise": 1.0}},
+        "7": {"class_type": "KSampler", "inputs": {"model": ["1", 0], "positive": ["4", 0], "negative": ["5", 0], "latent_image": ["6", 0], "seed": seed, "steps": img_m.get("steps", 20), "cfg": img_m.get("cfg", 3.5), "sampler_name": "dpmpp_2m", "scheduler": "normal", "denoise": 1.0}},
         "8": {"class_type": "VAEDecodeTiled", "inputs": {"samples": ["7", 0], "vae": ["3", 0], "tile_size": 512, "overlap": 64, "temporal_size": 64, "temporal_overlap": 8}},
-        # === Stage 2: Wan I2V from generated character ===
-        "9": {"class_type": "UNETLoader", "inputs": {"unet_name": "wan\\wan2.1_t2v_1.3b.safetensors", "weight_dtype": "default"}},
-        "10": {"class_type": "CLIPLoader", "inputs": {"clip_name": "wan_t5\\text_encoder\\model-00001-of-00003.safetensors", "type": "wan"}},
-        "11": {"class_type": "VAELoader", "inputs": {"vae_name": "wan\\Wan2.1_VAE.pth"}},
+        # === Stage 2: Wan I2V ===
+        "9": {"class_type": "UNETLoader", "inputs": {"unet_name": vid_m["unet"], "weight_dtype": "default"}},
+        "10": {"class_type": "CLIPLoader", "inputs": {"clip_name": vid_m["clip"], "type": vid_m["clip_type"]}},
+        "11": {"class_type": "VAELoader", "inputs": {"vae_name": vid_m["vae"]}},
         "12": {"class_type": "CLIPTextEncode", "inputs": {"text": motion_prompt, "clip": ["10", 0]}},
         "13": {"class_type": "CLIPTextEncode", "inputs": {"text": motion_neg, "clip": ["10", 0]}},
         "14": {"class_type": "WanImageToVideo", "inputs": {"positive": ["12", 0], "negative": ["13", 0], "vae": ["11", 0], "start_image": ["8", 0], "width": width, "height": height, "length": 81, "batch_size": 1}},
-        "15": {"class_type": "KSampler", "inputs": {"model": ["9", 0], "positive": ["14", 0], "negative": ["14", 1], "latent_image": ["14", 2], "seed": seed + 1, "steps": 20, "cfg": 4.0, "sampler_name": "euler", "scheduler": "simple", "denoise": 1.0}},
+        "15": {"class_type": "KSampler", "inputs": {"model": ["9", 0], "positive": ["14", 0], "negative": ["14", 1], "latent_image": ["14", 2], "seed": seed + 1, "steps": vid_m.get("steps", 20), "cfg": vid_m.get("cfg", 4.0), "sampler_name": "euler", "scheduler": "simple", "denoise": 1.0}},
         "16": {"class_type": "VAEDecode", "inputs": {"samples": ["15", 0], "vae": ["11", 0]}},
         "17": {"class_type": "PreviewImage", "inputs": {"images": ["8", 0]}},
         "18": {"class_type": "PreviewImage", "inputs": {"images": ["16", 0]}},
