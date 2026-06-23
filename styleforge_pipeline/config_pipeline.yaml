@@ -1,0 +1,74 @@
+# StyleForge 24h 自动化创作流水线配置
+# 运行: python pipeline.py --mode characters --hours 24
+
+pipeline:
+  name: "StyleForge 24h Pipeline"
+  comfyui_url: "http://127.0.0.1:8188"
+  output_dir: "./styleforge_pipeline/output"
+  checkpoint_interval: 10     # 每 N 张图保存一次进度
+  resume: true                # 支持断点续跑
+
+# 生成模式
+modes:
+  characters:
+    description: "角色设计生成"
+    width: 1024
+    height: 1024
+    steps: 20
+    cfg: 3.5
+    batch_interval: 30        # 每 30 秒提交一个任务
+    prompt_sets:
+      - "二次元风格, 幻想角色设计..."
+      - "写实风格, 古风人物..."
+      - "赛博朋克, 未来战士..."
+
+  scenes:
+    description: "场景概念图生成"
+    width: 1280
+    height: 720
+    steps: 18
+    cfg: 4.0
+
+  variants:
+    description: "同角色变体（换装/视角/情绪）"
+    # 需要 IP-Adapter 参考图
+
+# 评分系统
+scoring:
+  aesthetic:
+    enabled: true
+    threshold: 5.5            # CLIP 美学分 > 此值才保留（1-10）
+    model: "cafe_aesthetic"   # 离线美学评分模型
+
+  diversity:
+    enabled: true
+    min_distance: 0.15        # 最小余弦距离（低于此值视为重复，丢弃）
+
+  face_uniqueness:
+    enabled: true
+    anti_ai_face: true        # 过滤过于完美的 AI 脸
+    symmetry_threshold: 0.95  # 面部对称度上限
+
+  composition:
+    enabled: true
+    check_rule_of_thirds: true
+
+# 参考库 (用于学习经典设计)
+references:
+  sources:
+    - name: "Genshin Impact 角色"
+      keywords: ["原神", "Genshin character design", "anime game character"]
+    - name: "Final Fantasy"
+      keywords: ["Final Fantasy character", "JRPG design"]
+    - name: "Elden Ring"
+      keywords: ["Elden Ring character", "dark fantasy design"]
+    - name: "赛博朋克 2077"
+      keywords: ["Cyberpunk 2077 character", "sci-fi design"]
+
+# 输出分级
+output:
+  tiers:
+    S: { aesthetic_min: 7.5, face_unique: true }   # 顶级
+    A: { aesthetic_min: 6.5, face_unique: true }   # 优秀
+    B: { aesthetic_min: 5.5, face_unique: false }  # 可用
+    C: { aesthetic_min: 0.0 }                       # 存档（不推荐）
