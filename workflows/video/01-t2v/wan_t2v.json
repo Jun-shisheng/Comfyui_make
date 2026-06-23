@@ -1,0 +1,205 @@
+{
+  "last_node_id": 10,
+  "last_link_id": 14,
+  "nodes": [
+    {
+      "id": 1,
+      "type": "UNETLoader",
+      "pos": [50, 50],
+      "size": [315, 82],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {"name": "MODEL", "type": "MODEL", "links": [1], "slot_index": 0}
+      ],
+      "properties": {"Node name for S&R": "UNETLoader"},
+      "widgets_values": ["wan\\wan2.1_t2v_1.3b.safetensors", "default"],
+      "title": "Wan T2V 1.3B Model"
+    },
+    {
+      "id": 2,
+      "type": "CLIPLoader",
+      "pos": [50, 180],
+      "size": [315, 82],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {"name": "CLIP", "type": "CLIP", "links": [2, 3], "slot_index": 0}
+      ],
+      "properties": {"Node name for S&R": "CLIPLoader"},
+      "widgets_values": ["wan_t5\\text_encoder\\model-00001-of-00003.safetensors", "wan"],
+      "title": "umT5-XXL Text Encoder"
+    },
+    {
+      "id": 3,
+      "type": "VAELoader",
+      "pos": [50, 310],
+      "size": [315, 82],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {"name": "VAE", "type": "VAE", "links": [4, 12], "slot_index": 0}
+      ],
+      "properties": {"Node name for S&R": "VAELoader"},
+      "widgets_values": ["wan\\Wan2.1_VAE.pth"],
+      "title": "Wan 2.1 VAE"
+    },
+    {
+      "id": 4,
+      "type": "CLIPTextEncode",
+      "pos": [450, 50],
+      "size": [500, 200],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [
+        {"name": "clip", "type": "CLIP", "link": 2}
+      ],
+      "outputs": [
+        {"name": "CONDITIONING", "type": "CONDITIONING", "links": [5], "slot_index": 0}
+      ],
+      "properties": {"Node name for S&R": "CLIPTextEncode"},
+      "widgets_values": ["A single candle flame gently flickering in darkness, warm orange glow, macro cinematic shot, slow motion, peaceful atmosphere, photorealistic, 4K"],
+      "title": "Positive Prompt"
+    },
+    {
+      "id": 5,
+      "type": "CLIPTextEncode",
+      "pos": [450, 300],
+      "size": [500, 200],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [
+        {"name": "clip", "type": "CLIP", "link": 3}
+      ],
+      "outputs": [
+        {"name": "CONDITIONING", "type": "CONDITIONING", "links": [6], "slot_index": 0}
+      ],
+      "properties": {"Node name for S&R": "CLIPTextEncode"},
+      "widgets_values": ["blurry, static, cartoon, low quality, distorted, fast motion, text, watermark, worst quality"],
+      "title": "Negative Prompt"
+    },
+    {
+      "id": 6,
+      "type": "WanImageToVideo",
+      "pos": [1050, 100],
+      "size": [315, 260],
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [
+        {"name": "positive", "type": "CONDITIONING", "link": 5},
+        {"name": "negative", "type": "CONDITIONING", "link": 6},
+        {"name": "vae", "type": "VAE", "link": 4}
+      ],
+      "outputs": [
+        {"name": "positive", "type": "CONDITIONING", "links": [7], "slot_index": 0},
+        {"name": "negative", "type": "CONDITIONING", "links": [8], "slot_index": 1},
+        {"name": "latent", "type": "LATENT", "links": [9], "slot_index": 2}
+      ],
+      "properties": {"Node name for S&R": "WanImageToVideo"},
+      "widgets_values": [832, 480, 81, 1],
+      "title": "Video Config (T2V)"
+    },
+    {
+      "id": 7,
+      "type": "KSampler",
+      "pos": [1450, 100],
+      "size": [315, 310],
+      "flags": {},
+      "order": 6,
+      "mode": 0,
+      "inputs": [
+        {"name": "model", "type": "MODEL", "link": 1},
+        {"name": "positive", "type": "CONDITIONING", "link": 7},
+        {"name": "negative", "type": "CONDITIONING", "link": 8},
+        {"name": "latent_image", "type": "LATENT", "link": 9}
+      ],
+      "outputs": [
+        {"name": "LATENT", "type": "LATENT", "links": [10], "slot_index": 0}
+      ],
+      "properties": {"Node name for S&R": "KSampler"},
+      "widgets_values": [42, "fixed", 20, 4.0, "euler", "simple", 1.0],
+      "title": "Sampler"
+    },
+    {
+      "id": 8,
+      "type": "VAEDecode",
+      "pos": [1850, 100],
+      "size": [210, 46],
+      "flags": {},
+      "order": 7,
+      "mode": 0,
+      "inputs": [
+        {"name": "samples", "type": "LATENT", "link": 10},
+        {"name": "vae", "type": "VAE", "link": 12}
+      ],
+      "outputs": [
+        {"name": "IMAGE", "type": "IMAGE", "links": [11, 13], "slot_index": 0}
+      ],
+      "properties": {"Node name for S&R": "VAEDecode"}
+    },
+    {
+      "id": 9,
+      "type": "PreviewImage",
+      "pos": [2150, 50],
+      "size": [350, 350],
+      "flags": {},
+      "order": 8,
+      "mode": 0,
+      "inputs": [
+        {"name": "images", "type": "IMAGE", "link": 11}
+      ],
+      "outputs": [],
+      "properties": {"Node name for S&R": "PreviewImage"}
+    },
+    {
+      "id": 10,
+      "type": "SaveImage",
+      "pos": [2150, 450],
+      "size": [350, 270],
+      "flags": {},
+      "order": 9,
+      "mode": 0,
+      "inputs": [
+        {"name": "images", "type": "IMAGE", "link": 13}
+      ],
+      "outputs": [],
+      "properties": {"Node name for S&R": "SaveImage"},
+      "widgets_values": ["output/wan_t2v"],
+      "title": "Save Video Frames"
+    }
+  ],
+  "links": [
+    {"id": 1, "origin_id": 1, "origin_slot": 0, "target_id": 7, "target_slot": 0, "type": "MODEL"},
+    {"id": 2, "origin_id": 2, "origin_slot": 0, "target_id": 4, "target_slot": 0, "type": "CLIP"},
+    {"id": 3, "origin_id": 2, "origin_slot": 0, "target_id": 5, "target_slot": 0, "type": "CLIP"},
+    {"id": 4, "origin_id": 3, "origin_slot": 0, "target_id": 6, "target_slot": 2, "type": "VAE"},
+    {"id": 5, "origin_id": 4, "origin_slot": 0, "target_id": 6, "target_slot": 0, "type": "CONDITIONING"},
+    {"id": 6, "origin_id": 5, "origin_slot": 0, "target_id": 6, "target_slot": 1, "type": "CONDITIONING"},
+    {"id": 7, "origin_id": 6, "origin_slot": 0, "target_id": 7, "target_slot": 1, "type": "CONDITIONING"},
+    {"id": 8, "origin_id": 6, "origin_slot": 1, "target_id": 7, "target_slot": 2, "type": "CONDITIONING"},
+    {"id": 9, "origin_id": 6, "origin_slot": 2, "target_id": 7, "target_slot": 3, "type": "LATENT"},
+    {"id": 10, "origin_id": 7, "origin_slot": 0, "target_id": 8, "target_slot": 0, "type": "LATENT"},
+    {"id": 11, "origin_id": 8, "origin_slot": 0, "target_id": 9, "target_slot": 0, "type": "IMAGE"},
+    {"id": 12, "origin_id": 3, "origin_slot": 0, "target_id": 8, "target_slot": 1, "type": "VAE"},
+    {"id": 13, "origin_id": 8, "origin_slot": 0, "target_id": 10, "target_slot": 0, "type": "IMAGE"}
+  ],
+  "groups": [
+    {"title": "Model Loading (Wan 2.1 T2V 1.3B)", "bounding": [25, 25, 370, 410], "color": "#3f789e"},
+    {"title": "Prompt Input (T5 Text Encoder)", "bounding": [425, 25, 550, 520], "color": "#2ecc71"},
+    {"title": "Video Conditioning (WanImageToVideo)", "bounding": [1025, 25, 370, 380], "color": "#8e44ad"},
+    {"title": "Sampling & Decoding", "bounding": [1425, 25, 670, 420], "color": "#e74c3c"},
+    {"title": "Preview & Save", "bounding": [2125, 25, 400, 740], "color": "#f39c12"}
+  ],
+  "config": {},
+  "extra": {},
+  "version": 0.4
+}

@@ -1,0 +1,268 @@
+{
+  "last_node_id": 14,
+  "last_link_id": 20,
+  "nodes": [
+    {
+      "id": 1,
+      "type": "UNETLoader",
+      "pos": [50, 50],
+      "size": [315, 82],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {"name": "MODEL", "type": "MODEL", "links": [1], "slot_index": 0}
+      ],
+      "properties": {"Node name for S&R": "UNETLoader"},
+      "widgets_values": ["wan\\wan2.1_t2v_1.3b.safetensors", "default"],
+      "title": "Wan T2V 1.3B Model"
+    },
+    {
+      "id": 2,
+      "type": "CLIPLoader",
+      "pos": [50, 180],
+      "size": [315, 82],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {"name": "CLIP", "type": "CLIP", "links": [2, 3], "slot_index": 0}
+      ],
+      "properties": {"Node name for S&R": "CLIPLoader"},
+      "widgets_values": ["wan_t5\\text_encoder\\model-00001-of-00003.safetensors", "wan"],
+      "title": "umT5-XXL Text Encoder"
+    },
+    {
+      "id": 3,
+      "type": "VAELoader",
+      "pos": [50, 310],
+      "size": [315, 82],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {"name": "VAE", "type": "VAE", "links": [4, 14], "slot_index": 0}
+      ],
+      "properties": {"Node name for S&R": "VAELoader"},
+      "widgets_values": ["wan\\Wan2.1_VAE.pth"],
+      "title": "Wan 2.1 VAE"
+    },
+    {
+      "id": 4,
+      "type": "LoadImage",
+      "pos": [50, 440],
+      "size": [315, 314],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {"name": "IMAGE", "type": "IMAGE", "links": [11], "slot_index": 0},
+        {"name": "MASK", "type": "MASK", "links": null}
+      ],
+      "properties": {"Node name for S&R": "LoadImage"},
+      "widgets_values": ["start_frame.png", "image"],
+      "title": "Starting Frame (for I2V)"
+    },
+    {
+      "id": 5,
+      "type": "LoadImage",
+      "pos": [50, 800],
+      "size": [315, 314],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {"name": "IMAGE", "type": "IMAGE", "links": [12], "slot_index": 0},
+        {"name": "MASK", "type": "MASK", "links": null}
+      ],
+      "properties": {"Node name for S&R": "LoadImage"},
+      "widgets_values": ["source_face.png", "image"],
+      "title": "Source Face (to swap onto video)"
+    },
+    {
+      "id": 6,
+      "type": "CLIPTextEncode",
+      "pos": [450, 50],
+      "size": [500, 200],
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [
+        {"name": "clip", "type": "CLIP", "link": 2}
+      ],
+      "outputs": [
+        {"name": "CONDITIONING", "type": "CONDITIONING", "links": [5], "slot_index": 0}
+      ],
+      "properties": {"Node name for S&R": "CLIPTextEncode"},
+      "widgets_values": ["The person naturally smiles and turns head slightly, gentle hair movement, warm atmosphere, cinematic lighting, smooth motion"],
+      "title": "Motion Prompt (Positive)"
+    },
+    {
+      "id": 7,
+      "type": "CLIPTextEncode",
+      "pos": [450, 300],
+      "size": [500, 200],
+      "flags": {},
+      "order": 6,
+      "mode": 0,
+      "inputs": [
+        {"name": "clip", "type": "CLIP", "link": 3}
+      ],
+      "outputs": [
+        {"name": "CONDITIONING", "type": "CONDITIONING", "links": [6], "slot_index": 0}
+      ],
+      "properties": {"Node name for S&R": "CLIPTextEncode"},
+      "widgets_values": ["blurry, static, cartoon, low quality, distorted, fast motion, text, watermark, face distortion"],
+      "title": "Negative Prompt"
+    },
+    {
+      "id": 8,
+      "type": "WanImageToVideo",
+      "pos": [1050, 100],
+      "size": [315, 320],
+      "flags": {},
+      "order": 7,
+      "mode": 0,
+      "inputs": [
+        {"name": "positive", "type": "CONDITIONING", "link": 5},
+        {"name": "negative", "type": "CONDITIONING", "link": 6},
+        {"name": "vae", "type": "VAE", "link": 15},
+        {"name": "start_image", "type": "IMAGE", "link": 11}
+      ],
+      "outputs": [
+        {"name": "positive", "type": "CONDITIONING", "links": [7], "slot_index": 0},
+        {"name": "negative", "type": "CONDITIONING", "links": [8], "slot_index": 1},
+        {"name": "latent", "type": "LATENT", "links": [9], "slot_index": 2}
+      ],
+      "properties": {"Node name for S&R": "WanImageToVideo"},
+      "widgets_values": [832, 480, 81, 1],
+      "title": "I2V Conditioning"
+    },
+    {
+      "id": 9,
+      "type": "KSampler",
+      "pos": [1450, 100],
+      "size": [315, 310],
+      "flags": {},
+      "order": 8,
+      "mode": 0,
+      "inputs": [
+        {"name": "model", "type": "MODEL", "link": 1},
+        {"name": "positive", "type": "CONDITIONING", "link": 7},
+        {"name": "negative", "type": "CONDITIONING", "link": 8},
+        {"name": "latent_image", "type": "LATENT", "link": 9}
+      ],
+      "outputs": [
+        {"name": "LATENT", "type": "LATENT", "links": [10], "slot_index": 0}
+      ],
+      "properties": {"Node name for S&R": "KSampler"},
+      "widgets_values": [42, "fixed", 20, 4.0, "euler", "simple", 1.0],
+      "title": "Sampler"
+    },
+    {
+      "id": 10,
+      "type": "VAEDecode",
+      "pos": [1850, 100],
+      "size": [210, 46],
+      "flags": {},
+      "order": 9,
+      "mode": 0,
+      "inputs": [
+        {"name": "samples", "type": "LATENT", "link": 10},
+        {"name": "vae", "type": "VAE", "link": 14}
+      ],
+      "outputs": [
+        {"name": "IMAGE", "type": "IMAGE", "links": [13], "slot_index": 0}
+      ],
+      "properties": {"Node name for S&R": "VAEDecode"},
+      "title": "Video Frames (before face swap)"
+    },
+    {
+      "id": 11,
+      "type": "ReActorFaceSwap",
+      "pos": [2150, 200],
+      "size": [400, 500],
+      "flags": {},
+      "order": 10,
+      "mode": 0,
+      "inputs": [
+        {"name": "input_image", "type": "IMAGE", "link": 13},
+        {"name": "source_image", "type": "IMAGE", "link": 12}
+      ],
+      "outputs": [
+        {"name": "IMAGE", "type": "IMAGE", "links": [16, 17], "slot_index": 0},
+        {"name": "FACE_MODEL", "type": "FACE_MODEL", "links": null}
+      ],
+      "properties": {"Node name for S&R": "ReActorFaceSwap"},
+      "widgets_values": [true, "inswapper_128.onnx", "retinaface_resnet50", "GFPGANv1.4.pth", 1, 0.5, "no", "no", "0", "0", 1],
+      "title": "Face Swap (Per Frame)"
+    },
+    {
+      "id": 12,
+      "type": "PreviewImage",
+      "pos": [2650, 100],
+      "size": [350, 350],
+      "flags": {},
+      "order": 11,
+      "mode": 0,
+      "inputs": [
+        {"name": "images", "type": "IMAGE", "link": 16}
+      ],
+      "outputs": [],
+      "properties": {"Node name for S&R": "PreviewImage"},
+      "title": "Face-Swapped Video Preview"
+    },
+    {
+      "id": 13,
+      "type": "SaveImage",
+      "pos": [2650, 500],
+      "size": [350, 270],
+      "flags": {},
+      "order": 12,
+      "mode": 0,
+      "inputs": [
+        {"name": "images", "type": "IMAGE", "link": 17}
+      ],
+      "outputs": [],
+      "properties": {"Node name for S&R": "SaveImage"},
+      "widgets_values": ["output/faceswap_video"],
+      "title": "Save Face-Swapped Video Frames"
+    }
+  ],
+  "links": [
+    {"id": 1, "origin_id": 1, "origin_slot": 0, "target_id": 9, "target_slot": 0, "type": "MODEL"},
+    {"id": 2, "origin_id": 2, "origin_slot": 0, "target_id": 6, "target_slot": 0, "type": "CLIP"},
+    {"id": 3, "origin_id": 2, "origin_slot": 0, "target_id": 7, "target_slot": 0, "type": "CLIP"},
+    {"id": 4, "origin_id": 3, "origin_slot": 0, "target_id": 8, "target_slot": 2, "type": "VAE"},
+    {"id": 5, "origin_id": 6, "origin_slot": 0, "target_id": 8, "target_slot": 0, "type": "CONDITIONING"},
+    {"id": 6, "origin_id": 7, "origin_slot": 0, "target_id": 8, "target_slot": 1, "type": "CONDITIONING"},
+    {"id": 7, "origin_id": 8, "origin_slot": 0, "target_id": 9, "target_slot": 1, "type": "CONDITIONING"},
+    {"id": 8, "origin_id": 8, "origin_slot": 1, "target_id": 9, "target_slot": 2, "type": "CONDITIONING"},
+    {"id": 9, "origin_id": 8, "origin_slot": 2, "target_id": 9, "target_slot": 3, "type": "LATENT"},
+    {"id": 10, "origin_id": 9, "origin_slot": 0, "target_id": 10, "target_slot": 0, "type": "LATENT"},
+    {"id": 11, "origin_id": 4, "origin_slot": 0, "target_id": 8, "target_slot": 3, "type": "IMAGE"},
+    {"id": 12, "origin_id": 5, "origin_slot": 0, "target_id": 11, "target_slot": 1, "type": "IMAGE"},
+    {"id": 13, "origin_id": 10, "origin_slot": 0, "target_id": 11, "target_slot": 0, "type": "IMAGE"},
+    {"id": 14, "origin_id": 3, "origin_slot": 0, "target_id": 10, "target_slot": 1, "type": "VAE"},
+    {"id": 15, "origin_id": 3, "origin_slot": 0, "target_id": 8, "target_slot": 2, "type": "VAE"},
+    {"id": 16, "origin_id": 11, "origin_slot": 0, "target_id": 12, "target_slot": 0, "type": "IMAGE"},
+    {"id": 17, "origin_id": 11, "origin_slot": 0, "target_id": 13, "target_slot": 0, "type": "IMAGE"}
+  ],
+  "groups": [
+    {"title": "Model Loading", "bounding": [25, 25, 370, 410], "color": "#3f789e"},
+    {"title": "Input: Start Frame & Source Face", "bounding": [25, 420, 370, 730], "color": "#1abc9c"},
+    {"title": "Prompt: Motion Description", "bounding": [425, 25, 550, 520], "color": "#2ecc71"},
+    {"title": "I2V Conditioning", "bounding": [1025, 25, 370, 435], "color": "#8e44ad"},
+    {"title": "Sampling & Decode", "bounding": [1425, 25, 670, 420], "color": "#e74c3c"},
+    {"title": "Face Swap (ReActor)", "bounding": [2125, 25, 425, 710], "color": "#e67e22"},
+    {"title": "Output", "bounding": [2625, 25, 400, 740], "color": "#f39c12"}
+  ],
+  "config": {},
+  "extra": {},
+  "version": 0.4
+}

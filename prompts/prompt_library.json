@@ -1,0 +1,365 @@
+{
+  "version": "1.0",
+  "categories": {
+    "portrait": {
+      "name_cn": "写实人像",
+      "name_en": "Realistic Portrait",
+      "prompts": [
+        {
+          "id": "portrait_01",
+          "name_cn": "自然光人像",
+          "positive": "A stunning portrait of a young woman with natural freckles, soft golden hour backlighting, shallow depth of field, bokeh background, shot on 85mm f/1.4 lens, hyperrealistic, detailed skin texture, warm tones, professional fashion photography",
+          "negative": "blurry, distorted face, deformed features, bad anatomy, extra limbs, oversaturated, harsh lighting, plastic skin, 3D render, cartoon"
+        },
+        {
+          "id": "portrait_02",
+          "name_cn": "赛博朋克角色",
+          "positive": "Close-up portrait of a cyberpunk character, neon blue and pink lighting, cybernetic eye implant visible, rain-soaked streets reflected in background, moody atmosphere, cinematic lighting, detailed mechanical parts, film grain, shot on Sony A7III",
+          "negative": "blurry, ugly, deformed, cartoon, anime, low quality, pixelated"
+        },
+        {
+          "id": "portrait_03",
+          "name_cn": "古典中式美人",
+          "positive": "Elegant Chinese beauty in traditional Hanfu dress, flowing silk fabric, cherry blossom petals in the air, classical garden setting, soft diffused lighting, porcelain skin, delicate jewelry, ink wash painting aesthetic, ethereal atmosphere, masterpiece",
+          "negative": "modern clothing, western style, distorted face, bad anatomy, western architecture, messy composition"
+        },
+        {
+          "id": "portrait_04",
+          "name_cn": "商务精英头像",
+          "positive": "Professional corporate headshot, middle-aged businessman in navy suit, confident expression, clean studio lighting, neutral gray background, sharp focus on eyes, 85mm portrait lens, high-end retouching, LinkedIn profile style",
+          "negative": "casual clothing, messy hair, harsh shadows, distorted, low resolution, blurred"
+        },
+        {
+          "id": "portrait_05",
+          "name_cn": "街头时尚",
+          "positive": "Street fashion portrait, young Asian woman in oversized blazer and vintage jeans, urban alleyway setting, natural morning light, candid moment, Fuji film simulation, muted color palette, editorial style, lifestyle photography",
+          "negative": "studio lighting, formal pose, fake background, cartoon, 3D, bad quality"
+        },
+        {
+          "id": "portrait_06",
+          "name_cn": "暗调情绪人像",
+          "positive": "Moody low-key portrait, dramatic single light source, deep shadows, chiaroscuro lighting style, intense gaze, black and white aesthetic, fine art photography, texture emphasis, emotional depth",
+          "negative": "smiling, bright lighting, colorful, casual snapshot, flat lighting, overexposed"
+        },
+        {
+          "id": "portrait_07",
+          "name_cn": "唯美逆光人像",
+          "positive": "Dreamy backlit portrait, golden sunlight rim lighting through flowing hair, summer meadow setting, lens flare, ethereal atmosphere, soft focus edges, romantic mood, fairy tale aesthetic, warm amber tones",
+          "negative": "harsh shadows, dark silhouette, cold tones, urban background, artificial light"
+        },
+        {
+          "id": "portrait_08",
+          "name_cn": "精致妆造特写",
+          "positive": "Extreme close-up of flawless makeup artistry, intricate eyeshadow detail, glossy lips, perfectly blended foundation, macro photography, studio ring light, beauty campaign quality, cosmetic advertisement style",
+          "negative": "skin blemishes, messy makeup, unkempt hair, casual, dark, blurry edges"
+        }
+      ]
+    },
+    "cinematic": {
+      "name_cn": "电影感画面",
+      "name_en": "Cinematic Scenes",
+      "prompts": [
+        {
+          "id": "cinematic_01",
+          "name_cn": "科幻城市全景",
+          "positive": "Cinematic wide shot of a futuristic megacity, towering holographic skyscrapers, flying vehicles between buildings, purple and cyan neon lights, rain-slicked streets, blade runner aesthetic, anamorphic lens, volumetric fog, 8K, IMAX quality",
+          "negative": "daytime, natural lighting, rural, medieval, cartoon, low detail, pixelated"
+        },
+        {
+          "id": "cinematic_02",
+          "name_cn": "史诗战争场景",
+          "positive": "Epic medieval battle scene, thousands of armored warriors clashing at sunset, dramatic sky with storm clouds breaking, cinematic composition, dust particles in golden light, Peter Jackson style, wide angle, 35mm film",
+          "negative": "modern elements, guns, tanks, cartoon style, peaceful, clean"
+        },
+        {
+          "id": "cinematic_03",
+          "name_cn": "温馨乡村傍晚",
+          "positive": "Golden hour in rural countryside, old stone cottage with smoke rising from chimney, wildflower meadow in foreground, warm sunlight filtering through oak trees, atmospheric haze, Studio Ghibli meets realism, peaceful mood",
+          "negative": "urban, modern buildings, cars, pollution, gloomy weather, night"
+        },
+        {
+          "id": "cinematic_04",
+          "name_cn": "深海神秘场景",
+          "positive": "Deep underwater scene, ancient submerged temple ruins, bioluminescent creatures emitting blue light, sun rays penetrating from surface far above, floating particles, mysterious atmosphere, James Cameron documentary style, 8K",
+          "negative": "surface level, bright daylight, empty water, cartoon fish, shallow reef"
+        },
+        {
+          "id": "cinematic_05",
+          "name_cn": "赛博朋克夜市",
+          "positive": "Cyberpunk night market alley, dense crowd of diverse characters, steaming food stalls with red lanterns, holographic advertisements reflecting on wet pavement, neon signs in multiple languages, rain drizzle, blade runner atmosphere, neon-noir",
+          "negative": "empty street, daylight, clean surfaces, minimalist, modern western city"
+        },
+        {
+          "id": "cinematic_06",
+          "name_cn": "末日废墟",
+          "positive": "Post-apocalyptic city ruins, nature reclaiming skyscrapers with vines and moss, lone survivor walking through debris, dramatic overcast sky, desaturated color grade, The Last of Us aesthetic, cinematic composition, emotional storytelling",
+          "negative": "clean city, crowded, bright, happy, cartoon, undamaged buildings"
+        },
+        {
+          "id": "cinematic_07",
+          "name_cn": "太空站日出",
+          "positive": "International space station exterior, Earth's curvature visible below, sunrise breaking over planet's edge, golden light reflecting off solar panels, stars visible in deep space background, ultra realistic, NASA photography quality, awe-inspiring scale",
+          "negative": "flat earth, cartoon, low quality, interior shot, dark, small scale"
+        },
+        {
+          "id": "cinematic_08",
+          "name_cn": "武侠竹林对决",
+          "positive": "Wuxia martial arts duel in misty bamboo forest, two warriors suspended mid-air, bamboo leaves swirling in wind, dynamic action pose, soft morning fog, sunlight piercing through canopy, Zhang Yimou Hero film aesthetic, dramatic shadows",
+          "negative": "modern clothes, guns, urban setting, static pose, western fighting style"
+        }
+      ]
+    },
+    "anime": {
+      "name_cn": "动漫插画",
+      "name_en": "Anime & Illustration",
+      "prompts": [
+        {
+          "id": "anime_01",
+          "name_cn": "日系二次元少女",
+          "positive": "Beautiful anime girl, flowing long blue hair with cherry blossom hairpin, sparkling blue eyes, Japanese school uniform, cherry blossom petals floating in spring breeze, soft pastel colors, studio trigger art style, high quality anime illustration",
+          "negative": "realistic, 3D, photorealistic, western art style, deformed, ugly, messy"
+        },
+        {
+          "id": "anime_02",
+          "name_cn": "吉卜力风格场景",
+          "positive": "Studio Ghibli style landscape, lush green hills with winding path, small cottage with red roof, fluffy clouds in bright blue sky, detailed grass and wildflowers, warm lighting, hand-painted texture, Miyazaki aesthetic, peaceful countryside",
+          "negative": "realistic photo, 3D render, dark, urban, modern architecture, western style"
+        },
+        {
+          "id": "anime_03",
+          "name_cn": "赛博朋克二次元",
+          "positive": "Cyberpunk anime character, female cyborg with visible mechanical arms, neon pink and blue hair, futuristic Tokyo background, glowing holograms, detailed mechanical design, Ghost in the Shell art style, 90s anime aesthetic, hand-drawn",
+          "negative": "3D CGI, photorealistic, western comic style, simple, cute style"
+        },
+        {
+          "id": "anime_04",
+          "name_cn": "水墨国风插画",
+          "positive": "Chinese ink wash painting style illustration, lone warrior with sword standing on mountain peak, misty clouds surrounding peaks, traditional brush strokes, minimal color with red accents, poetry inscription, ancient Chinese art aesthetic, elegant composition",
+          "negative": "oil painting, western art, cartoon, digital CG, bright colors, realistic photo"
+        },
+        {
+          "id": "anime_05",
+          "name_cn": "韩系厚涂角色",
+          "positive": "Korean manhwa style character illustration, handsome male protagonist in fantasy armor, dramatic lighting from magical aura, detailed metallic rendering, semi-realistic anime style, painterly brush strokes, webtoon art quality, vibrant colors",
+          "negative": "manga style, flat colors, simple lineart, chibi, deformed"
+        },
+        {
+          "id": "anime_06",
+          "name_cn": "蒸汽朋克幻想",
+          "positive": "Steampunk anime illustration, young inventor girl with goggles, intricate brass clockwork machinery background, warm copper and gold tones, gears and pipes, steam atmosphere, Last Exile art style, detailed mechanical design, whimsical",
+          "negative": "modern technology, digital screens, cyberpunk, clean, minimalist"
+        },
+        {
+          "id": "anime_07",
+          "name_cn": "唯美新海诚风",
+          "positive": "Makoto Shinkai style scene, train station at twilight, cherry blossoms and power lines silhouetted against orange sky, lens flare, atmospheric light rays, highly detailed background, emotional mood, photorealistic anime, Your Name aesthetic",
+          "negative": "dark, indoors, simple background, flat colors, cartoon, low detail"
+        },
+        {
+          "id": "anime_08",
+          "name_cn": "奇幻冒险插画",
+          "positive": "Fantasy adventure anime illustration, party of adventurers overlooking vast magical landscape, floating islands and waterfalls, dragons in distant sky, detailed character designs, RPG game art style, epic composition, vibrant fantasy colors",
+          "negative": "modern setting, sci-fi, dark, horror, simple, minimal"
+        }
+      ]
+    },
+    "commercial": {
+      "name_cn": "产品商业",
+      "name_en": "Product & Commercial",
+      "prompts": [
+        {
+          "id": "commercial_01",
+          "name_cn": "化妆品广告",
+          "positive": "Luxury skincare product photography, glass bottle with gold cap on marble surface, water droplets and fresh rose petals, soft natural window light, cream background, high-end cosmetic advertisement, clean minimal composition, 100mm macro lens",
+          "negative": "cluttered, dark, low quality, plastic, messy, text overlay"
+        },
+        {
+          "id": "commercial_02",
+          "name_cn": "美食摄影",
+          "positive": "Gourmet food photography, artisanal pasta dish with fresh herbs and parmesan, steam rising, warm restaurant ambient lighting, shallow depth of field, rustic wooden table, olive oil drizzle detail, Michelin star presentation, mouth-watering",
+          "negative": "fast food, plastic, cold, unappetizing, messy plate, harsh flash"
+        },
+        {
+          "id": "commercial_03",
+          "name_cn": "科技产品渲染",
+          "positive": "Sleek smartphone product render, floating at 45-degree angle, clean white studio background, subtle reflection on glossy surface, edge lighting highlighting titanium frame, premium tech advertisement, Apple-style minimalism, sharp details",
+          "negative": "scratches, dirt, hand holding, busy background, dark, low resolution"
+        },
+        {
+          "id": "commercial_04",
+          "name_cn": "时尚服装展示",
+          "positive": "Fashion editorial, model wearing avant-garde designer dress, dramatic studio lighting with colored gels, wind effect on fabric, Vogue magazine style, full body shot, high contrast, artistic shadow patterns, luxury fashion campaign",
+          "negative": "casual wear, street style, low budget, poor lighting, messy"
+        }
+      ]
+    },
+    "landscape": {
+      "name_cn": "风景摄影",
+      "name_en": "Landscape & Nature",
+      "prompts": [
+        {
+          "id": "landscape_01",
+          "name_cn": "雪山日出",
+          "positive": "Majestic snow-capped mountain peak at alpenglow sunrise, pink and orange light on summit, crystal clear alpine lake reflection, pine forest in foreground, dramatic clouds, National Geographic quality, wide panorama, pristine wilderness",
+          "negative": "city, buildings, people, flat land, overcast, dark, low resolution"
+        },
+        {
+          "id": "landscape_02",
+          "name_cn": "热带海滩",
+          "positive": "Paradise tropical beach, crystal clear turquoise water, white sand, palm trees leaning over shore, gentle waves, clear blue sky with few clouds, Maldives style, drone aerial view, vacation mood, vibrant colors",
+          "negative": "crowded, pollution, grey sky, urban, cold climate, storm"
+        },
+        {
+          "id": "landscape_03",
+          "name_cn": "秋日森林",
+          "positive": "Enchanted autumn forest, golden and red maple leaves canopy, sunbeams filtering through trees, moss-covered path winding through, fallen leaves carpeting ground, fairy tale atmosphere, warm amber tones, medium format film look",
+          "negative": "bare trees, winter, summer green, urban, people, artificial structures"
+        },
+        {
+          "id": "landscape_04",
+          "name_cn": "极光星空",
+          "positive": "Aurora borealis dancing across starry night sky, silhouettes of pine trees and snowy mountains, ice reflections on frozen lake, magical green and purple lights, long exposure photography, arctic wilderness, ethereal beauty, 8K",
+          "negative": "daytime, city lights, clouds covering sky, tropical, warm weather"
+        }
+      ]
+    },
+    "abstract": {
+      "name_cn": "艺术抽象",
+      "name_en": "Abstract & Artistic",
+      "prompts": [
+        {
+          "id": "abstract_01",
+          "name_cn": "流动色彩",
+          "positive": "Abstract fluid art, swirling waves of vibrant acrylic colors mixing dynamically, gold leaf accents, marble texture effect, alcohol ink technique, high-end gallery art, macro detail of paint flow, mesmerizing patterns, contemporary art",
+          "negative": "realistic objects, people, text, frames, simple solid colors"
+        },
+        {
+          "id": "abstract_02",
+          "name_cn": "几何极简",
+          "positive": "Minimalist geometric composition, Bauhaus style, primary colors on cream background, clean lines and circles, architectural abstraction, balanced asymmetry, museum poster quality, mid-century modern aesthetic, intellectual design",
+          "negative": "photorealistic, complex, ornate, baroque, messy, organic shapes"
+        },
+        {
+          "id": "abstract_03",
+          "name_cn": "数字故障艺术",
+          "positive": "Glitch art abstract, digital corruption aesthetic, RGB channel displacement, vaporwave color palette, datamoshing effect, retro CRT scanlines, cyberpunk visual noise, experimental digital art, A E S T H E T I C",
+          "negative": "clean image, natural photo, smooth gradients, realistic, traditional art"
+        },
+        {
+          "id": "abstract_04",
+          "name_cn": "超现实梦境",
+          "positive": "Surrealist dreamscape, floating islands with upside-down cities, impossible stairs and doors in sky, melting clocks, Dali-inspired, mind-bending perspective, rich oil painting texture, subconscious exploration, thought-provoking",
+          "negative": "normal reality, simple landscape, photorealistic, ordinary, boring"
+        }
+      ]
+    },
+    "video_t2v": {
+      "name_cn": "文生视频专用",
+      "name_en": "Text-to-Video Prompts",
+      "prompts": [
+        {
+          "id": "t2v_01",
+          "name_cn": "烛光摇曳",
+          "positive": "A single candle flame gently flickering in darkness, warm orange glow illuminating nearby wooden surface, subtle smoke wisps rising, shallow depth of field, macro cinematic shot, slow motion feel, peaceful atmosphere",
+          "negative": "bright lighting, multiple candles, fast movement, animated, cartoon, static"
+        },
+        {
+          "id": "t2v_02",
+          "name_cn": "雨窗氛围",
+          "positive": "Raindrops streaming down a window pane, city lights blurred through water droplets in background, melancholy mood, slow camera pan, ambient lighting, cozy indoor feeling, cinematic, 24fps film look",
+          "negative": "static image, clear window, sunny, fast motion, cartoon"
+        },
+        {
+          "id": "t2v_03",
+          "name_cn": "瀑布奔流",
+          "positive": "Majestic waterfall cascading down mossy cliff face, mist rising from impact point, sunlight creating rainbow in spray, lush tropical vegetation surrounding, smooth slow motion water, nature documentary quality, serene",
+          "negative": "still water, dry rocks, urban, people, fast motion, low resolution"
+        },
+        {
+          "id": "t2v_04",
+          "name_cn": "城市车流延时",
+          "positive": "Busy city intersection at blue hour, car light trails creating flowing ribbons, skyscrapers lighting up in background, timelapse feel, smooth motion, urban energy, Tokyo Shibuya crossing, cinematic color grade",
+          "negative": "empty street, daytime, rural, still traffic, blurry, handheld shake"
+        },
+        {
+          "id": "t2v_05",
+          "name_cn": "樱花飘落",
+          "positive": "Cherry blossom petals gently falling in spring breeze, traditional Japanese temple roof in background, soft pink and white colors, slow motion, peaceful hanami atmosphere, warm afternoon light, dreamy bokeh",
+          "negative": "storm, rain, winter, bare trees, fast motion, people, modern buildings"
+        },
+        {
+          "id": "t2v_06",
+          "name_cn": "海浪拍岸",
+          "positive": "Ocean waves gently rolling onto sandy beach at sunset, foam patterns forming and dissolving, golden reflection on wet sand, rhythmic natural movement, ASMR quality, calming, drone slow approach shot",
+          "negative": "storm, rough sea, crowded beach, boats, artificial structures, night"
+        },
+        {
+          "id": "t2v_07",
+          "name_cn": "咖啡蒸腾",
+          "positive": "Close-up of fresh coffee cup, delicate steam rising and swirling in morning light, crema patterns on surface, cozy cafe window background, slow gentle motion, warm brown tones, hygge aesthetic, 50mm lens",
+          "negative": "cold drink, fast movement, neon lighting, messy table, dark"
+        },
+        {
+          "id": "t2v_08",
+          "name_cn": "花开延时",
+          "positive": "Beautiful flower blooming in timelapse, petals unfurling gracefully, dewdrops glistening, soft natural light changing, black background, botanical documentary style, smooth transition from bud to full bloom, macro detail",
+          "negative": "still flower, wilting, insects, wind shaking, artificial, low quality"
+        },
+        {
+          "id": "t2v_09",
+          "name_cn": "云海翻涌",
+          "positive": "Sea of clouds rolling over mountain peaks at sunrise, golden light painting cloud tops, mountain islands emerging from mist, slow majestic movement, drone perspective, heaven-like atmosphere, spiritual, awe-inspiring",
+          "negative": "clear sky, flat landscape, fast motion, urban, night, low altitude"
+        },
+        {
+          "id": "t2v_10",
+          "name_cn": "星轨旋转",
+          "positive": "Star trail timelapse over ancient stone circle, night sky rotating slowly, Polaris at center, silhouetted monument foreground, subtle moonlight illumination, magical atmosphere, long exposure simulation, cosmic wonder",
+          "negative": "daytime, city lights, clouds, moving camera, fast rotation, bright"
+        }
+      ]
+    },
+    "video_i2v": {
+      "name_cn": "图生视频专用",
+      "name_en": "Image-to-Video Prompts",
+      "prompts": [
+        {
+          "id": "i2v_01",
+          "name_cn": "人物微笑",
+          "positive": "The person in the image naturally smiles and turns their head slightly, gentle expression change, subtle hair movement, soft lighting, candid moment, warm atmosphere",
+          "negative": "expressionless, frozen, dramatic change, different person, cartoon, deformed face"
+        },
+        {
+          "id": "i2v_02",
+          "name_cn": "风吹发丝",
+          "positive": "Gentle wind blowing through the subject's hair, fabric and clothing moving softly in breeze, outdoor atmosphere, leaves rustling in background, natural movement, golden hour lighting",
+          "negative": "static hair, indoor setting, strong wind, messy, fast movement"
+        },
+        {
+          "id": "i2v_03",
+          "name_cn": "镜头缓慢推进",
+          "positive": "Slow camera dolly-in toward the subject, cinematic push-in effect, maintaining focus on eyes, dramatic tension building, shallow depth of field, subtle parallax in background",
+          "negative": "camera shake, fast zoom, out of focus, reverse movement, jump cut"
+        },
+        {
+          "id": "i2v_04",
+          "name_cn": "光影变化",
+          "positive": "Subtle lighting changes across the scene, clouds passing over sun creating shifting shadows, time passing effect, warm to cool tone transition, moody atmosphere, cinematic lighting",
+          "negative": "static lighting, flash, strobe, harsh shadow changes, artificial light flicker"
+        },
+        {
+          "id": "i2v_05",
+          "name_cn": "微表情特写",
+          "positive": "Extreme close-up of face, eyes blinking naturally, subtle micro-expressions of wonder, pupil dilation, slight lip movement, intimate portrait becoming alive, macro detail, emotional",
+          "negative": "exaggerated expression, talking, fast movement, wide shot, blurry"
+        },
+        {
+          "id": "i2v_06",
+          "name_cn": "场景动态",
+          "positive": "The scene comes alive with ambient movement, curtains swaying slightly, dust particles dancing in light beams, subtle environmental animation, living painting effect, gentle atmospheric changes",
+          "negative": "static image, cartoon animation, fast movement, chaotic, character focus"
+        }
+      ]
+    }
+  }
+}

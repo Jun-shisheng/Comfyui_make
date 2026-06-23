@@ -1,0 +1,164 @@
+{
+  "last_node_id": 9,
+  "last_link_id": 10,
+  "nodes": [
+    {
+      "id": 1,
+      "type": "UNETLoader",
+      "pos": [50, 100],
+      "size": [315, 82],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {"name": "MODEL", "type": "MODEL", "links": [1], "slot_index": 0},
+        {"name": "CLIP", "type": "CLIP", "links": [2], "slot_index": 1},
+        {"name": "VAE", "type": "VAE", "links": [3], "slot_index": 2}
+      ],
+      "properties": {"Node name for S&R": "UNETLoader"},
+      "widgets_values": ["qwen_image_fp8_e4m3fn.safetensors", "default"],
+      "title": "Load Qwen Image"
+    },
+    {
+      "id": 2,
+      "type": "TextEncodeQwenImageEdit",
+      "pos": [450, 50],
+      "size": [500, 200],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [
+        {"name": "clip", "type": "CLIP", "link": 2},
+        {"name": "vae", "type": "VAE", "link": null},
+        {"name": "image", "type": "IMAGE", "link": null}
+      ],
+      "outputs": [
+        {"name": "CONDITIONING", "type": "CONDITIONING", "links": [4, 5], "slot_index": 0}
+      ],
+      "properties": {"Node name for S&R": "TextEncodeQwenImageEdit"},
+      "widgets_values": ["masterpiece, best quality, 1girl, beautiful face, detailed eyes, photorealistic, soft lighting"],
+      "title": "Positive Prompt"
+    },
+    {
+      "id": 3,
+      "type": "TextEncodeQwenImageEdit",
+      "pos": [450, 300],
+      "size": [500, 200],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [
+        {"name": "clip", "type": "CLIP", "link": 2},
+        {"name": "vae", "type": "VAE", "link": null},
+        {"name": "image", "type": "IMAGE", "link": null}
+      ],
+      "outputs": [
+        {"name": "CONDITIONING", "type": "CONDITIONING", "links": [6], "slot_index": 0}
+      ],
+      "properties": {"Node name for S&R": "TextEncodeQwenImageEdit"},
+      "widgets_values": ["bad quality, worst quality, blurry, distorted face, deformed, ugly, extra fingers, bad anatomy"],
+      "title": "Negative Prompt"
+    },
+    {
+      "id": 4,
+      "type": "EmptyQwenImageLayeredLatentImage",
+      "pos": [450, 550],
+      "size": [315, 130],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {"name": "LATENT", "type": "LATENT", "links": [7], "slot_index": 0}
+      ],
+      "properties": {"Node name for S&R": "EmptyQwenImageLayeredLatentImage"},
+      "widgets_values": [1024, 1024, 3, 1]
+    },
+    {
+      "id": 5,
+      "type": "KSampler",
+      "pos": [1000, 200],
+      "size": [315, 262],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [
+        {"name": "model", "type": "MODEL", "link": 1},
+        {"name": "positive", "type": "CONDITIONING", "link": 4},
+        {"name": "negative", "type": "CONDITIONING", "link": 6},
+        {"name": "latent_image", "type": "LATENT", "link": 7}
+      ],
+      "outputs": [
+        {"name": "LATENT", "type": "LATENT", "links": [8], "slot_index": 0}
+      ],
+      "properties": {"Node name for S&R": "KSampler"},
+      "widgets_values": [123456789, "fixed", 20, 3.5, "dpmpp_2m", "normal", 1.15]
+    },
+    {
+      "id": 6,
+      "type": "VAEDecode",
+      "pos": [1400, 200],
+      "size": [210, 46],
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [
+        {"name": "samples", "type": "LATENT", "link": 8},
+        {"name": "vae", "type": "VAE", "link": 3}
+      ],
+      "outputs": [
+        {"name": "IMAGE", "type": "IMAGE", "links": [9, 10], "slot_index": 0}
+      ],
+      "properties": {"Node name for S&R": "VAEDecode"}
+    },
+    {
+      "id": 7,
+      "type": "PreviewImage",
+      "pos": [1700, 100],
+      "size": [300, 300],
+      "flags": {},
+      "order": 6,
+      "mode": 0,
+      "inputs": [
+        {"name": "images", "type": "IMAGE", "link": 9}
+      ],
+      "outputs": [],
+      "properties": {"Node name for S&R": "PreviewImage"}
+    },
+    {
+      "id": 8,
+      "type": "SaveImage",
+      "pos": [1700, 450],
+      "size": [315, 270],
+      "flags": {},
+      "order": 7,
+      "mode": 0,
+      "inputs": [
+        {"name": "images", "type": "IMAGE", "link": 10}
+      ],
+      "outputs": [],
+      "properties": {"Node name for S&R": "SaveImage"},
+      "widgets_values": ["output/qwen_txt2img"]
+    }
+  ],
+  "links": [
+    {"id": 1, "origin_id": 1, "origin_slot": 0, "target_id": 5, "target_slot": 0, "type": "MODEL"},
+    {"id": 2, "origin_id": 1, "origin_slot": 1, "target_id": 2, "target_slot": 0, "type": "CLIP"},
+    {"id": 3, "origin_id": 1, "origin_slot": 2, "target_id": 6, "target_slot": 1, "type": "VAE"},
+    {"id": 4, "origin_id": 2, "origin_slot": 0, "target_id": 5, "target_slot": 1, "type": "CONDITIONING"},
+    {"id": 6, "origin_id": 3, "origin_slot": 0, "target_id": 5, "target_slot": 2, "type": "CONDITIONING"},
+    {"id": 7, "origin_id": 4, "origin_slot": 0, "target_id": 5, "target_slot": 3, "type": "LATENT"},
+    {"id": 8, "origin_id": 5, "origin_slot": 0, "target_id": 6, "target_slot": 0, "type": "LATENT"},
+    {"id": 9, "origin_id": 6, "origin_slot": 0, "target_id": 7, "target_slot": 0, "type": "IMAGE"},
+    {"id": 10, "origin_id": 6, "origin_slot": 0, "target_id": 8, "target_slot": 0, "type": "IMAGE"}
+  ],
+  "groups": [
+    {"title": "Model Loading", "bounding": [25, 25, 370, 200], "color": "#3f789e"},
+    {"title": "Prompt & Latent", "bounding": [425, 25, 550, 700], "color": "#2ecc71"},
+    {"title": "Sampling & Output", "bounding": [975, 25, 1050, 700], "color": "#e74c3c"}
+  ],
+  "config": {},
+  "extra": {},
+  "version": 0.4
+}

@@ -1,0 +1,10 @@
+data/raw/
+data/standardized/
+data/datasets/
+data/_staging/
+loras/*.safetensors
+clustering/embeddings.npy
+output/
+*.tmp
+__pycache__/
+.env

@@ -1,0 +1,50 @@
+# StyleForge Configuration
+# ------------------------
+
+# Paths (relative to project root)
+paths:
+  raw_data: data/raw
+  standardized: data/standardized
+  datasets: data/datasets
+  loras: loras
+  clustering: clustering
+  output: output
+  workflows: workflows
+
+# CLIP clustering
+clustering:
+  model: ViT-L-14
+  pretrained: datacomp_xl_s13b_b90k
+  umap_dims: 16
+  umap_metric: cosine
+  umap_n_neighbors: 15
+  umap_min_dist: 0.1
+  hdbscan_min_cluster_size: 8
+  hdbscan_cluster_selection_epsilon: 0.1
+
+# LoRA training
+training:
+  base_model: models/flux-2-klein-4b.safetensors
+  base_model_url: https://huggingface.co/black-forest-labs/FLUX.2-Klein-4B
+  default_rank: 8
+  default_learning_rate: 1.0e-4
+  default_batch_size: 1
+  precision: fp8
+  optimizer: adafactor
+  resolution: 1024
+  bucket_training: true
+  save_checkpoint_every: 100
+
+# ComfyUI integration
+comfyui:
+  models_dir: G:/ComfyUI/models
+  loras_symlink: false  # Using extra_model_paths.yaml instead
+
+# Hardware profile (notebook RTX 4060 8GB)
+hardware:
+  vram_gb: 8
+  ram_gb: 32
+  default_device: cpu  # CLIP runs on CPU to save VRAM for training/inference
+  inference_precision: q4  # GGUF quantization for inference
+  max_controlnets: 1
+  max_ip_adapters: 1
