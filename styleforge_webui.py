@@ -121,8 +121,18 @@ def _get_model(cfg, env, section, key, default=None):
         return default
 
 
-def build_txt2img_workflow(prompt, negative_prompt, width, height, seed):
+def build_txt2img_workflow(prompt, negative_prompt, width, height, seed, model="qwen_image"):
     cfg, env = load_config()
+
+    if model == "ideogram4":
+        return build_ideogram4_workflow(cfg, env, prompt, negative_prompt, width, height, seed)
+    elif model == "flux2":
+        return build_flux2_workflow(cfg, env, prompt, negative_prompt, width, height, seed)
+    else:
+        return build_qwen_image_workflow(cfg, env, prompt, negative_prompt, width, height, seed)
+
+
+def build_qwen_image_workflow(cfg, env, prompt, negative_prompt, width, height, seed):
     m = cfg.get("image", {}).get("txt2img", {}).get(env, {})
     steps = m.get("steps", 12 if env == "local" else 20)
     cfg_val = m.get("cfg", 3.5)
@@ -137,6 +147,53 @@ def build_txt2img_workflow(prompt, negative_prompt, width, height, seed):
         "8": {"class_type": "VAEDecodeTiled", "inputs": {"samples": ["7", 0], "vae": ["3", 0], "tile_size": 512, "overlap": 64, "temporal_size": 64, "temporal_overlap": 8}},
         "9": {"class_type": "PreviewImage", "inputs": {"images": ["8", 0]}},
         "10": {"class_type": "SaveImage", "inputs": {"images": ["8", 0], "filename_prefix": "qwen_txt2img"}},
+    }
+
+
+def build_ideogram4_workflow(cfg, env, prompt, negative_prompt, width, height, seed):
+    m = cfg.get("image", {}).get("ideogram4", {}).get(env, {})
+    if not m:
+        return None
+    steps = m.get("steps", 10)
+    cfg_val = m.get("cfg", 0.0)
+    return {
+        "1": {"class_type": "UNETLoader", "inputs": {"unet_name": m["unet"], "weight_dtype": "default"}},
+        "2": {"class_type": "CLIPLoader", "inputs": {"clip_name": m["clip"], "type": m["clip_type"]}},
+        "3": {"class_type": "VAELoader", "inputs": {"vae_name": m["vae"]}},
+        "4": {"class_type": "CLIPTextEncode", "inputs": {"text": prompt, "clip": ["2", 0]}},
+        "5": {"class_type": "CLIPTextEncode", "inputs": {"text": negative_prompt, "clip": ["2", 0]}},
+        "6": {"class_type": "EmptySD3LatentImage", "inputs": {"width": width, "height": height, "batch_size": 1}},
+        "7": {"class_type": "Ideogram4Scheduler", "inputs": {"steps": steps, "width": width, "height": height, "mu": 0.0, "std": 1.75}},
+        "8": {"class_type": "KSamplerSelect", "inputs": {"sampler_name": "euler"}},
+        "9": {"class_type": "SamplerCustom", "inputs": {"model": ["1", 0], "add_noise": True, "noise_seed": seed, "cfg": cfg_val, "positive": ["4", 0], "negative": ["5", 0], "sampler": ["8", 0], "sigmas": ["7", 0], "latent_image": ["6", 0]}},
+        "10": {"class_type": "VAEDecode", "inputs": {"samples": ["9", 0], "vae": ["3", 0]}},
+        "11": {"class_type": "PreviewImage", "inputs": {"images": ["10", 0]}},
+        "12": {"class_type": "SaveImage", "inputs": {"images": ["10", 0], "filename_prefix": "ideogram4_txt2img"}},
+    }
+
+
+def build_flux2_workflow(cfg, env, prompt, negative_prompt, width, height, seed):
+    m = cfg.get("image", {}).get("flux2", {}).get(env, {})
+    if not m:
+        return None
+    steps = m.get("steps", 25)
+    cfg_val = m.get("cfg", 2.0)
+    return {
+        "1": {"class_type": "UNETLoader", "inputs": {"unet_name": m["unet"], "weight_dtype": "default"}},
+        "2": {"class_type": "CLIPLoader", "inputs": {"clip_name": m["clip"], "type": m["clip_type"]}},
+        "3": {"class_type": "CLIPLoader", "inputs": {"clip_name": m["t5"], "type": m["clip_type"]}},
+        "4": {"class_type": "VAELoader", "inputs": {"vae_name": m["vae"]}},
+        "5": {"class_type": "CLIPTextEncode", "inputs": {"text": prompt, "clip": ["2", 0]}},
+        "6": {"class_type": "CLIPTextEncode", "inputs": {"text": prompt, "clip": ["3", 0]}},
+        "7": {"class_type": "CLIPTextEncode", "inputs": {"text": negative_prompt, "clip": ["2", 0]}},
+        "8": {"class_type": "CLIPTextEncode", "inputs": {"text": negative_prompt, "clip": ["3", 0]}},
+        "9": {"class_type": "EmptyFlux2LatentImage", "inputs": {"width": width, "height": height, "batch_size": 1}},
+        "10": {"class_type": "KSamplerSelect", "inputs": {"sampler_name": "euler"}},
+        "11": {"class_type": "BasicScheduler", "inputs": {"model": ["1", 0], "scheduler": "simple", "steps": steps, "denoise": 1.0}},
+        "12": {"class_type": "SamplerCustom", "inputs": {"model": ["1", 0], "add_noise": True, "noise_seed": seed, "cfg": cfg_val, "positive": ["5", 0], "negative": ["7", 0], "sampler": ["10", 0], "sigmas": ["11", 0], "latent_image": ["9", 0]}},
+        "13": {"class_type": "VAEDecode", "inputs": {"samples": ["12", 0], "vae": ["4", 0]}},
+        "14": {"class_type": "PreviewImage", "inputs": {"images": ["13", 0]}},
+        "15": {"class_type": "SaveImage", "inputs": {"images": ["13", 0], "filename_prefix": "flux2_txt2img"}},
     }
 
 
@@ -310,11 +367,11 @@ def poll_until_done(prompt_id, max_wait=1200):
 
 # ============ UI Generation Functions ============
 
-def generate_txt2img(prompt, negative_prompt, width, height, seed):
+def generate_txt2img(prompt, negative_prompt, width, height, seed, model):
     if seed == -1:
         seed = int(time.time() * 1000) % 2147483647
 
-    wf = build_txt2img_workflow(prompt, negative_prompt, width, height, seed)
+    wf = build_txt2img_workflow(prompt, negative_prompt, width, height, seed, model)
 
     try:
         result = queue_prompt(wf)
@@ -510,7 +567,7 @@ def create_ui():
     with gr.Blocks(title="StyleForge - ComfyUI Creative Studio", theme=gr.themes.Soft()) as ui:
         gr.Markdown("""
         # StyleForge Creative Studio
-        ### AI Image & Video Generation | Qwen Image + Wan 2.1 | RTX 4060 Optimized
+        ### AI Image & Video Generation | Ideogram 4 + FLUX.2 + Qwen Image + Wan 2.1 | RTX 4060 Optimized
         """)
 
         with gr.Tabs():
@@ -518,6 +575,12 @@ def create_ui():
             with gr.Tab("文生图 Text-to-Image"):
                 with gr.Row():
                     with gr.Column(scale=2):
+                        txt2img_model = gr.Dropdown(
+                            choices=["ideogram4", "flux2", "qwen_image"],
+                            value="ideogram4",
+                            label="模型 Model",
+                            info="Ideogram 4: 排版设计/文字渲染 | FLUX.2: 写实摄影 | Qwen Image: 中文原生"
+                        )
                         prompt = gr.Textbox(
                             label="提示词 Prompt",
                             placeholder="Describe what you want to see...",
@@ -560,7 +623,7 @@ def create_ui():
 
                 generate_btn.click(
                     fn=generate_txt2img,
-                    inputs=[prompt, negative_prompt, width, height, seed],
+                    inputs=[prompt, negative_prompt, width, height, seed, txt2img_model],
                     outputs=[output_image, status_text]
                 )
 
@@ -677,7 +740,7 @@ def create_ui():
         # Footer
         gr.Markdown("""
         ---
-        **Models**: Qwen Image FP8 + Wan 2.1 1.3B | **Hardware**: RTX 4060 8GB | **Resolution**: 480p Video, up to 1024px Image
+        **Models**: Ideogram 4 NF4 + FLUX.2 Klein 4B + Qwen Image FP8 + Wan 2.1 | **Hardware**: RTX 4060 8GB | **Resolution**: up to 2048px Image, 480p Video
         """)
 
     return ui

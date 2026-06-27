@@ -23,14 +23,46 @@ image:
       steps: 20
       cfg: 3.5
 
-  # 可选: FLUX.1-dev (需下载 flux1-dev.safetensors + clip_l.safetensors + t5xxl_fp16.safetensors)
-  flux:
-    cloud_4090:
-      unet: "flux1-dev.safetensors"
-      clip: "clip_l.safetensors"
-      t5: "t5xxl_fp16.safetensors"
-      vae: "ae.safetensors"
+  # Ideogram 4 — 文字渲染/排版设计最强开源模型 (9.3B DiT, NF4=单卡24GB)
+  # 替换原 SDXL 的"备用"角色, 已成为主力设计模型
+  ideogram4:
+    local:
+      unet: "ideogram4-nf4\\diffusion_models\\ideogram_4_nf4.safetensors"
+      clip: "ideogram4-nf4\\text_encoders\\model-00001-of-00004.safetensors"
+      clip_type: "ideogram4"
+      vae: "ideogram4-nf4\\vae\\model.safetensors"
       max_resolution: 2048
+      steps: 10
+      cfg: 0.0
+    cloud_4090:
+      unet: "ideogram4-fp8\\diffusion_models\\ideogram_4.safetensors"
+      clip: "ideogram4-fp8\\text_encoders\\model-00001-of-00004.safetensors"
+      clip_type: "ideogram4"
+      vae: "ideogram4-fp8\\vae\\model.safetensors"
+      max_resolution: 2048
+      steps: 10
+      cfg: 0.0
+
+  # FLUX.2 Klein 4B — 写实摄影/自然场景 (4B DiT)
+  flux2:
+    local:
+      unet: "flux-2-klein-4b\\diffusion_models\\flux2_klein_4b_fp8.safetensors"
+      clip: "flux-2-klein-4b\\text_encoders\\clip_l.safetensors"
+      t5: "flux-2-klein-4b\\text_encoders\\t5xxl_fp16.safetensors"
+      clip_type: "flux2"
+      vae: "flux-2-klein-4b\\vae\\ae.safetensors"
+      max_resolution: 1024
+      steps: 25
+      cfg: 2.0
+    cloud_4090:
+      unet: "flux-2-klein-4b\\diffusion_models\\flux2_klein_4b_fp16.safetensors"
+      clip: "flux-2-klein-4b\\text_encoders\\clip_l.safetensors"
+      t5: "flux-2-klein-4b\\text_encoders\\t5xxl_fp16.safetensors"
+      clip_type: "flux2"
+      vae: "flux-2-klein-4b\\vae\\ae.safetensors"
+      max_resolution: 2048
+      steps: 25
+      cfg: 2.0
 
 # 视频生成模型
 video:
